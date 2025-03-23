@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ shopping_list.name }} - Menedżer Lodówki{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="card">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h1 class="text-2xl font-bold">{{ shopping_list.name }}</h1>
+                <p class="text-sm text-gray-600">
+                    Utworzono: {{ shopping_list.created_at|date:"d.m.Y" }}
+                </p>
+            </div>
+            <div class="flex space-x-2">
+                <a href="{% url 'shopping_list:add_item' shopping_list.pk %}" class="btn-primary">
+                    Dodaj produkt
+                </a>
+                <a href="{% url 'shopping_list:delete' shopping_list.pk %}" class="btn-secondary">
+                    Usuń listę
+                </a>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            {% for item in items %}
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm border {% if item.is_bought %}bg-gray-50{% endif %}">
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" 
+                           class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                           {% if item.is_bought %}checked{% endif %}
+                           data-item-id="{{ item.pk }}"
+                           onchange="toggleItemStatus(this)">
+                    <div>
+                        <h3 class="text-lg font-semibold {% if item.is_bought %}line-through text-gray-500{% endif %}">
+                            {{ item.product.name }}
+                        </h3>
+                        <p class="text-sm text-gray-600">{{ item.product.category.name }}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-lg font-semibold {% if item.is_bought %}line-through text-gray-500{% endif %}">
+                        {{ item.quantity }} {{ item.unit }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        Dodano: {{ item.created_at|date:"d.m.Y" }}
+                    </p>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-8">
+                <p class="text-gray-600">Ta lista jest pusta.</p>
+                <p class="text-gray-600 mt-2">Dodaj produkty, aby rozpocząć planowanie zakupów!</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-6">
+            <a href="{% url 'shopping_list:list' %}" class="text-blue-500 hover:text-blue-700">
+                ← Powrót do list zakupów
+            </a>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function toggleItemStatus(checkbox) {
+    const itemId = checkbox.dataset.itemId;
+    fetch(`/shopping-list/{{ shopping_list.pk }}/toggle-item/${itemId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const itemContainer = checkbox.closest('.flex');
+            if (data.is_bought) {
+                itemContainer.classList.add('bg-gray-50');
+                itemContainer.querySelector('h3').classList.add('line-through', 'text-gray-500');
+                itemContainer.querySelector('.text-lg').classList.add('line-through', 'text-gray-500');
+            } else {
+                itemContainer.classList.remove('bg-gray-50');
+                itemContainer.querySelector('h3').classList.remove('line-through', 'text-gray-500');
+                itemContainer.querySelector('.text-lg').classList.remove('line-through', 'text-gray-500');
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
+{% endblock %} 

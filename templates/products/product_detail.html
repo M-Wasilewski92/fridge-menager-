@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - Menedżer Lodówki{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h1 class="text-2xl font-bold">{{ product.name }}</h1>
+                <p class="text-gray-600">{{ product.category.name }}</p>
+            </div>
+            <div class="flex space-x-2">
+                <a href="{% url 'products:update' product.pk %}" class="btn-primary">
+                    Edytuj
+                </a>
+                <a href="{% url 'products:delete' product.pk %}" class="btn-secondary">
+                    Usuń
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-lg font-semibold mb-2">Informacje podstawowe</h3>
+                <dl class="space-y-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Kod kreskowy</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ product.barcode|default:"Brak" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Ilość</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ product.quantity }} {{ product.unit }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Data ważności</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ product.expiry_date|date:"d.m.Y" }}</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold mb-2">Informacje dodatkowe</h3>
+                <dl class="space-y-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Data dodania</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ product.created_at|date:"d.m.Y H:i" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Ostatnia aktualizacja</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ product.updated_at|date:"d.m.Y H:i" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Status</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if product.is_active %}
+                            <span class="text-green-600">Aktywny</span>
+                            {% else %}
+                            <span class="text-red-600">Nieaktywny</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <a href="{% url 'products:list' %}" class="text-blue-500 hover:text-blue-700">
+                ← Powrót do listy produktów
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Przyjaciele - Menedżer Lodówki{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="card">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">Przyjaciele</h2>
+            <button onclick="toggleAddFriendForm()" class="btn-primary">
+                Dodaj przyjaciela
+            </button>
+        </div>
+
+        <div id="add-friend-form" class="hidden mb-6">
+            <form method="post" action="{% url 'users:add_friend' %}" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email przyjaciela</label>
+                    <input type="email" name="email" id="email" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="toggleAddFriendForm()" class="btn-secondary">
+                        Anuluj
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        Dodaj
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {% if received_requests %}
+        <div class="mb-8">
+            <h3 class="text-xl font-semibold mb-4">Otrzymane zaproszenia</h3>
+            <div class="space-y-4">
+                {% for request in received_requests %}
+                <div class="bg-white rounded-lg shadow p-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                            <span class="text-xl font-semibold text-gray-600">
+                                {{ request.sender.username|first|upper }}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">{{ request.sender.username }}</h4>
+                            <p class="text-sm text-gray-600">{{ request.sender.email }}</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <form method="post" action="{% url 'users:accept_friend_request' request.id %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-primary">Akceptuj</button>
+                        </form>
+                        <form method="post" action="{% url 'users:reject_friend_request' request.id %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-secondary">Odrzuć</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if pending_requests %}
+        <div class="mb-8">
+            <h3 class="text-xl font-semibold mb-4">Wysłane zaproszenia</h3>
+            <div class="space-y-4">
+                {% for request in pending_requests %}
+                <div class="bg-white rounded-lg shadow p-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                            <span class="text-xl font-semibold text-gray-600">
+                                {{ request.receiver.username|first|upper }}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">{{ request.receiver.username }}</h4>
+                            <p class="text-sm text-gray-600">{{ request.receiver.email }}</p>
+                        </div>
+                    </div>
+                    <span class="text-yellow-600">Oczekujące</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if friends %}
+        <div>
+            <h3 class="text-xl font-semibold mb-4">Twoi przyjaciele</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for friend in friends %}
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                <span class="text-xl font-semibold text-gray-600">
+                                    {{ friend.username|first|upper }}
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">{{ friend.username }}</h3>
+                            <p class="text-gray-600">{{ friend.email }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end space-x-2">
+                        <button class="text-blue-500 hover:text-blue-700">
+                            Wyślij zaproszenie do lodówki
+                        </button>
+                        <form method="post" action="{% url 'users:remove_friend' friend.id %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-500 hover:text-red-700">
+                                Usuń z przyjaciół
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <p class="text-gray-600">Nie masz jeszcze żadnych przyjaciół.</p>
+            <p class="text-gray-600 mt-2">Dodaj przyjaciół, aby współdzielić z nimi zawartość lodówki!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function toggleAddFriendForm() {
+    const form = document.getElementById('add-friend-form');
+    form.classList.toggle('hidden');
+}
+</script>
+{% endblock %} 

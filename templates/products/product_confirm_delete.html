@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Usuń produkt - Menedżer Lodówki{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="card">
+        <h2 class="text-2xl font-bold mb-6">Usuń produkt</h2>
+        <p class="text-gray-600 mb-6">
+            Czy na pewno chcesz usunąć produkt "{{ object.name }}"?
+            Tej operacji nie można cofnąć.
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'products:detail' object.pk %}" class="btn-secondary">
+                    Anuluj
+                </a>
+                <button type="submit" class="btn-primary bg-red-500 hover:bg-red-600">
+                    Usuń produkt
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

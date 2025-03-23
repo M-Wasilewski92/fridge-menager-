@@ -1,0 +1,22 @@
+{
+  "name": "fridge-manager",
+  "version": "1.0.0",
+  "description": "Aplikacja do zarządzania zawartością lodówki",
+  "scripts": {
+    "build": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "django",
+    "tailwindcss",
+    "fridge",
+    "manager"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35"
+  }
+} 

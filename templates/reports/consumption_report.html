@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Raport zużycia - Menedżer Lodówki{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Raport zużycia</h1>
+        <div class="flex space-x-4">
+            <a href="{% url 'reports:dashboard' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                Powrót do dashboardu
+            </a>
+            <a href="{% url 'reports:export_consumption_csv' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                Eksportuj CSV
+            </a>
+            <a href="{% url 'reports:export_consumption_pdf' %}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                Eksportuj PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Statystyki -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Łączne zużycie</h2>
+            <div class="text-3xl font-bold text-blue-600">
+                {{ total_quantity }}
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Średnie zużycie</h2>
+            <div class="text-3xl font-bold text-purple-600">
+                {{ average_quantity }}
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Liczba wpisów</h2>
+            <div class="text-3xl font-bold text-green-600">
+                {{ total_consumptions }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Wykres trendu -->
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Trend zużycia</h2>
+        <canvas id="consumptionTrendChart"></canvas>
+    </div>
+
+    <!-- Lista zużycia -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Lista zużycia</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Data
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Produkt
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Ilość
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Jednostka
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for consumption in consumptions %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ consumption.consumption_date|date:"d.m.Y" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900">
+                            {{ consumption.product.name }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ consumption.quantity }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ consumption.unit }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                            Brak wpisów zużycia do wyświetlenia.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/reports/api/consumption-trends/')
+        .then(response => response.json())
+        .then(data => {
+            new Chart(document.getElementById('consumptionTrendChart'), {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Zużycie',
+                        data: data.values,
+                        borderColor: 'rgb(59, 130, 246)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+});
+</script>
+{% endblock %} 

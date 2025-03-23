@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Kategorie - Menedżer Lodówki{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Kategorie produktów</h1>
+        <a href="{% url 'products:category_create' %}" class="btn-primary">
+            Dodaj kategorię
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for category in categories %}
+        <div class="card">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold">{{ category.name }}</h3>
+                    <p class="text-gray-600">{{ category.description|default:"Brak opisu" }}</p>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2">
+                <a href="{% url 'products:category_update' category.pk %}" class="text-blue-600 hover:text-blue-800">
+                    Edytuj
+                </a>
+                <a href="{% url 'products:category_delete' category.pk %}" class="text-red-600 hover:text-red-800">
+                    Usuń
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-8">
+            <p class="text-gray-600">Nie masz jeszcze żadnych kategorii.</p>
+            <p class="text-gray-600 mt-2">Dodaj kategorie, aby lepiej organizować swoje produkty!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

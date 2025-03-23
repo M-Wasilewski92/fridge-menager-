@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Edytuj kategorię - Menedżer Lodówki
+    {% else %}
+        Dodaj kategorię - Menedżer Lodówki
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">
+            {% if form.instance.pk %}
+                Edytuj kategorię
+            {% else %}
+                Dodaj nową kategorię
+            {% endif %}
+        </h1>
+    </div>
+
+    <div class="card max-w-2xl mx-auto">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'products:category_list' %}" class="btn-secondary">
+                    Anuluj
+                </a>
+                <button type="submit" class="btn-primary">
+                    {% if form.instance.pk %}
+                        Zapisz zmiany
+                    {% else %}
+                        Dodaj kategorię
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

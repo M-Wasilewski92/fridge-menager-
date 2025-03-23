@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Strona główna - Menedżer Lodówki{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="text-center py-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            Witaj w Menedżerze Lodówki
+        </h1>
+        <p class="text-xl text-gray-600 mb-8">
+            Zorganizuj swoją lodówkę i nigdy nie zapomnij o ważnych produktach!
+        </p>
+        {% if user.is_authenticated %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card">
+                <h3 class="text-xl font-semibold mb-4">Produkty</h3>
+                <p class="text-gray-600 mb-4">
+                    Zarządzaj zawartością swojej lodówki, dodawaj nowe produkty i śledź ich daty ważności.
+                </p>
+                <a href="{% url 'products:list' %}" class="btn-primary inline-block">
+                    Zobacz produkty
+                </a>
+            </div>
+            <div class="card">
+                <h3 class="text-xl font-semibold mb-4">Kategorie</h3>
+                <p class="text-gray-600 mb-4">
+                    Organizuj produkty w kategorie, aby lepiej zarządzać zawartością lodówki.
+                </p>
+                <a href="{% url 'products:category_list' %}" class="btn-primary inline-block">
+                    Zarządzaj kategoriami
+                </a>
+            </div>
+            <div class="card">
+                <h3 class="text-xl font-semibold mb-4">Lista Zakupów</h3>
+                <p class="text-gray-600 mb-4">
+                    Twórz i zarządzaj listami zakupów, aby nigdy nie zabrakło potrzebnych produktów.
+                </p>
+                <a href="{% url 'shopping_list:list' %}" class="btn-primary inline-block">
+                    Zobacz listę
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Raporty i statystyki</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card">
+                    <h3 class="text-xl font-semibold mb-4">Podsumowanie</h3>
+                    <p class="text-gray-600 mb-4">
+                        Zobacz podsumowanie swoich wydatków, zużycia produktów i marnowania żywności.
+                    </p>
+                    <a href="{% url 'reports:dashboard' %}" class="btn-primary inline-block">
+                        Zobacz podsumowanie
+                    </a>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-semibold mb-4">Raporty</h3>
+                    <p class="text-gray-600 mb-4">
+                        Generuj szczegółowe raporty i eksportuj je do CSV lub PDF.
+                    </p>
+                    <a href="{% url 'reports:expense_report' %}" class="btn-primary inline-block">
+                        Zobacz raporty
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="mt-8">
+            <p class="text-gray-600 mb-4">
+                Zaloguj się, aby korzystać z wszystkich funkcji Menedżera Lodówki!
+            </p>
+            <a href="{% url 'login' %}" class="btn-primary inline-block">
+                Zaloguj się
+            </a>
+            <span class="mx-2">lub</span>
+            <a href="{% url 'users:register' %}" class="btn-secondary inline-block">
+                Zarejestruj się
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="mt-12">
+        <h2 class="text-2xl font-bold text-center mb-8">Dlaczego warto używać Menedżera Lodówki?</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="card text-center">
+                <div class="text-4xl mb-4">📱</div>
+                <h3 class="text-lg font-semibold mb-2">Łatwe zarządzanie</h3>
+                <p class="text-gray-600">
+                    Prosty i intuicyjny interfejs do zarządzania zawartością lodówki.
+                </p>
+            </div>
+            <div class="card text-center">
+                <div class="text-4xl mb-4">⏰</div>
+                <h3 class="text-lg font-semibold mb-2">Powiadomienia</h3>
+                <p class="text-gray-600">
+                    Otrzymuj powiadomienia o zbliżających się terminach ważności produktów.
+                </p>
+            </div>
+            <div class="card text-center">
+                <div class="text-4xl mb-4">👥</div>
+                <h3 class="text-lg font-semibold mb-2">Współdzielenie</h3>
+                <p class="text-gray-600">
+                    Współdziel lodówkę z rodziną i przyjaciółmi.
+                </p>
+            </div>
+            <div class="card text-center">
+                <div class="text-4xl mb-4">💰</div>
+                <h3 class="text-lg font-semibold mb-2">Oszczędność</h3>
+                <p class="text-gray-600">
+                    Unikaj marnowania żywności i oszczędzaj pieniądze.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

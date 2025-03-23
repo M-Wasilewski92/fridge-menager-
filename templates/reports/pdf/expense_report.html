@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Raport wydatków - Menedżer Lodówki</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+            color: #1a1a1a;
+        }
+        .header p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            flex: 1;
+            margin: 0 10px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .stat-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .stat-box p {
+            margin: 0;
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Raport wydatków</h1>
+        <p>Wygenerowano: {{ generated_at|date:"d.m.Y H:i" }}</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat-box">
+            <h3>Łączne wydatki</h3>
+            <p>{{ total_amount|floatformat:2 }} zł</p>
+        </div>
+        <div class="stat-box">
+            <h3>Średnia wartość</h3>
+            <p>{{ average_amount|floatformat:2 }} zł</p>
+        </div>
+        <div class="stat-box">
+            <h3>Liczba zakupów</h3>
+            <p>{{ total_expenses }}</p>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Lista zakupów</th>
+                <th>Kwota</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in expenses %}
+            <tr>
+                <td>{{ expense.shopping_date|date:"d.m.Y" }}</td>
+                <td>{{ expense.shopping_list.name }}</td>
+                <td>{{ expense.total_amount|floatformat:2 }} zł</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Menedżer Lodówki - Raport wydatków</p>
+    </div>
+</body>
+</html> 

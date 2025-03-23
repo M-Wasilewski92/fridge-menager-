@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Raport Wydatków</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .date {
+            text-align: right;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Raport Wydatków</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Lista zakupów</th>
+                <th>Kwota</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in expenses %}
+            <tr>
+                <td>{{ expense.shopping_date|date:"Y-m-d" }}</td>
+                <td>{{ expense.shopping_list.name }}</td>
+                <td>{{ expense.total_amount }} zł</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="summary">
+        <p><strong>Suma wydatków:</strong> {{ total_expenses }} zł</p>
+        <p><strong>Średnia wydatków:</strong> {{ avg_expense|floatformat:2 }} zł</p>
+    </div>
+
+    <div class="date">
+        Data wygenerowania: {{ date }}
+    </div>
+</body>
+</html> 

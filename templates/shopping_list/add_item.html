@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Dodaj produkt do listy - Menedżer Lodówki{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card">
+        <h2 class="text-2xl font-bold mb-6">Dodaj produkt do listy "{{ shopping_list.name }}"</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="mt-6 flex justify-end space-x-4">
+                <a href="{% url 'shopping_list:detail' shopping_list.pk %}" class="btn-secondary">
+                    Anuluj
+                </a>
+                <button type="submit" class="btn-primary">
+                    Dodaj produkt
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

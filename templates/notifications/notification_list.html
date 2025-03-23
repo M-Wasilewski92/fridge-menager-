@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Powiadomienia - Menedżer Lodówki{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Powiadomienia</h1>
+        <div class="flex space-x-4">
+            <button id="markAllRead" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                Oznacz wszystkie jako przeczytane
+            </button>
+            <a href="{% url 'reports:dashboard' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                Powrót do dashboardu
+            </a>
+        </div>
+    </div>
+
+    {% if notifications %}
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="divide-y divide-gray-200">
+                {% for notification in notifications %}
+                    <div class="p-4 {% if not notification.read %}bg-blue-50{% endif %} notification-item" data-id="{{ notification.id }}">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-medium text-gray-900">{{ notification.title }}</h3>
+                                <p class="mt-1 text-sm text-gray-600">{{ notification.message }}</p>
+                                <div class="mt-2 text-xs text-gray-500">
+                                    {{ notification.created_at|date:"d.m.Y H:i" }}
+                                </div>
+                            </div>
+                            <div class="ml-4 flex-shrink-0">
+                                {% if not notification.read %}
+                                    <button class="mark-read-btn text-blue-600 hover:text-blue-800">
+                                        Oznacz jako przeczytane
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if notification.link %}
+                            <div class="mt-2">
+                                <a href="{{ notification.link }}" class="text-sm text-blue-600 hover:text-blue-800">
+                                    Zobacz szczegóły →
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if is_paginated %}
+            <div class="mt-4 flex justify-center">
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            Poprzednia
+                        </a>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="relative inline-flex items-center px-4 py-2 border border-blue-500 bg-blue-50 text-sm font-medium text-blue-600">
+                                {{ num }}
+                            </span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            Następna
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-12">
+            <h3 class="text-lg font-medium text-gray-900">Brak powiadomień</h3>
+            <p class="mt-1 text-sm text-gray-500">Nie masz żadnych powiadomień do wyświetlenia.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Oznaczanie pojedynczego powiadomienia jako przeczytane
+    document.querySelectorAll('.mark-read-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const notificationItem = this.closest('.notification-item');
+            const notificationId = notificationItem.dataset.id;
+            
+            fetch(`/notifications/${notificationId}/mark-read/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    notificationItem.classList.remove('bg-blue-50');
+                    this.remove();
+                    updateUnreadCount();
+                }
+            });
+        });
+    });
+
+    // Oznaczanie wszystkich powiadomień jako przeczytane
+    document.getElementById('markAllRead').addEventListener('click', function() {
+        fetch('/notifications/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.querySelectorAll('.notification-item').forEach(item => {
+                    item.classList.remove('bg-blue-50');
+                });
+                document.querySelectorAll('.mark-read-btn').forEach(btn => btn.remove());
+                updateUnreadCount();
+            }
+        });
+    });
+
+    // Funkcja do pobierania tokenu CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Funkcja do aktualizacji licznika nieprzeczytanych powiadomień
+    function updateUnreadCount() {
+        fetch('/notifications/unread-count/')
+            .then(response => response.json())
+            .then(data => {
+                const countElement = document.getElementById('notification-count');
+                if (countElement) {
+                    countElement.textContent = data.count;
+                    if (data.count === 0) {
+                        countElement.classList.add('hidden');
+                    } else {
+                        countElement.classList.remove('hidden');
+                    }
+                }
+            });
+    }
+});
+</script>
+{% endblock %} 

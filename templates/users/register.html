@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Rejestracja - Menedżer Lodówki{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="card">
+        <h2 class="text-2xl font-bold mb-6">Rejestracja</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="mt-6">
+                <button type="submit" class="btn-primary w-full">
+                    Zarejestruj się
+                </button>
+            </div>
+        </form>
+        <div class="mt-4 text-center">
+            <p class="text-gray-600">
+                Masz już konto? 
+                <a href="{% url 'login' %}" class="text-blue-500 hover:text-blue-700">
+                    Zaloguj się
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

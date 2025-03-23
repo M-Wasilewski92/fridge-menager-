@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Menedżer Lodówki{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/crispy-tailwind@0.1.0/dist/crispy-tailwind.min.css" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="{% url 'home' %}" class="text-xl font-bold text-blue-600">
+                            Menedżer Lodówki
+                        </a>
+                    </div>
+                    {% if user.is_authenticated %}
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="{% url 'products:list' %}" class="inline-flex items-center px-1 pt-1 text-gray-900">
+                            Produkty
+                        </a>
+                        <a href="{% url 'shopping_list:list' %}" class="inline-flex items-center px-1 pt-1 text-gray-900">
+                            Lista zakupów
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex items-center">
+                    {% if user.is_authenticated %}
+                    <div class="relative ml-3">
+                        <button type="button" 
+                                class="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none"
+                                onclick="toggleNotifications()">
+                            <span class="sr-only">Powiadomienia</span>
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <span id="notification-count" 
+                                  class="absolute top-0 right-0 block h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                                0
+                            </span>
+                        </button>
+                        <div id="notification-dropdown" 
+                             class="hidden origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                            <div class="py-1">
+                                <div class="px-4 py-2 text-sm text-gray-700 border-b">
+                                    <div class="flex justify-between items-center">
+                                        <span>Powiadomienia</span>
+                                        <a href="{% url 'notifications:all' %}" class="text-blue-600 hover:text-blue-800">
+                                            Zobacz wszystkie
+                                        </a>
+                                    </div>
+                                </div>
+                                <div id="notification-list" class="max-h-96 overflow-y-auto">
+                                    <!-- Powiadomienia będą dodawane dynamicznie -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ml-3 relative">
+                        <div>
+                            <button type="button" 
+                                    class="flex text-sm rounded-full focus:outline-none"
+                                    onclick="toggleUserMenu()">
+                                <span class="sr-only">Otwórz menu użytkownika</span>
+                                <span class="text-gray-700">{{ user.username }}</span>
+                            </button>
+                        </div>
+                        <div id="user-menu" 
+                             class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                            <div class="py-1">
+                                <a href="{% url 'users:profile' %}" 
+                                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    Profil
+                                </a>
+                                <a href="{% url 'logout' %}" 
+                                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    Wyloguj
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="text-gray-700 hover:text-gray-900">
+                        Zaloguj
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="py-6">
+        {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+            {% for message in messages %}
+            <div class="rounded-md p-4 {% if message.tags == 'success' %}bg-green-50 text-green-700{% elif message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-blue-50 text-blue-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+    function toggleUserMenu() {
+        const menu = document.getElementById('user-menu');
+        menu.classList.toggle('hidden');
+    }
+
+    function toggleNotifications() {
+        const dropdown = document.getElementById('notification-dropdown');
+        dropdown.classList.toggle('hidden');
+        if (!dropdown.classList.contains('hidden')) {
+            loadNotifications();
+        }
+    }
+
+    function loadNotifications() {
+        fetch('/notifications/unread-count/')
+            .then(response => response.json())
+            .then(data => {
+                const countElement = document.getElementById('notification-count');
+                countElement.textContent = data.count;
+                if (data.count > 0) {
+                    countElement.classList.remove('hidden');
+                    loadNotificationDetails();
+                } else {
+                    countElement.classList.add('hidden');
+                }
+            });
+    }
+
+    function loadNotificationDetails() {
+        fetch('/notifications/')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const notifications = doc.querySelectorAll('.notification-item');
+                
+                const notificationList = document.getElementById('notification-list');
+                notificationList.innerHTML = '';
+                
+                notifications.slice(0, 5).forEach(notification => {
+                    const title = notification.querySelector('h3').textContent;
+                    const message = notification.querySelector('p').textContent;
+                    const link = notification.querySelector('a')?.href || '#';
+                    const isRead = !notification.classList.contains('bg-blue-50');
+                    
+                    const notificationElement = document.createElement('div');
+                    notificationElement.className = `px-4 py-2 ${isRead ? '' : 'bg-blue-50'}`;
+                    notificationElement.innerHTML = `
+                        <a href="${link}" class="block">
+                            <div class="text-sm font-medium text-gray-900">${title}</div>
+                            <div class="text-sm text-gray-500">${message}</div>
+                        </a>
+                    `;
+                    notificationList.appendChild(notificationElement);
+                });
+                
+                if (notifications.length === 0) {
+                    notificationList.innerHTML = `
+                        <div class="px-4 py-2 text-sm text-gray-500">
+                            Brak powiadomień
+                        </div>
+                    `;
+                }
+            });
+    }
+
+    // Zamykanie menu po kliknięciu poza nim
+    document.addEventListener('click', function(event) {
+        const userMenu = document.getElementById('user-menu');
+        const notificationDropdown = document.getElementById('notification-dropdown');
+        
+        if (!event.target.closest('.relative')) {
+            userMenu.classList.add('hidden');
+            notificationDropdown.classList.add('hidden');
+        }
+    });
+
+    // Odświeżanie liczby powiadomień co 30 sekund
+    setInterval(loadNotifications, 30000);
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 
